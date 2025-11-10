@@ -1,0 +1,51 @@
+<!-- save this as generate_fireworks.html and open in browser -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>生成烟花页面</title>
+</head>
+<body>
+  <h1>烟花页面生成器</h1>
+  <button onclick="generateFiles()">生成25个烟花页面</button>
+  <div id="output"></div>
+
+  <script>
+    function generateFiles() {
+      const baseFireworksCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2025新年快乐！万事如意！</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <!-- 完整的烟花页面代码，这里需要放入您提供的完整烟花代码 -->
+</head>
+<body>
+  <!-- 烟花页面内容 -->
+</body>
+</html>`;
+
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+      
+      for (let i = 1; i <= 25; i++) {
+        // 为每个用户创建独特的页面
+        const userSpecificCode = baseFireworksCode
+          .replace('2025新年快乐！万事如意！', `用户${i}的专属烟花 - 2025新年快乐！`)
+          .replace('Settings', `用户${i}的个性化设置`);
+        
+        const blob = new Blob([userSpecificCode], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `fireworks${i}.html`;
+        link.textContent = `下载 fireworks${i}.html`;
+        link.style.display = 'block';
+        link.style.margin = '10px';
+        
+        output.appendChild(link);
+      }
+    }
+  </script>
+</body>
+</html>
