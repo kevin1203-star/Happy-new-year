@@ -1,51 +1,392 @@
-<!-- save this as generate_fireworks.html and open in browser -->
 <!DOCTYPE html>
-<html>
-<head>
-  <title>生成烟花页面</title>
-</head>
-<body>
-  <h1>烟花页面生成器</h1>
-  <button onclick="generateFiles()">生成25个烟花页面</button>
-  <div id="output"></div>
-
-  <script>
-    function generateFiles() {
-      const baseFireworksCode = `<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>2025新年快乐！万事如意！</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <!-- 完整的烟花页面代码，这里需要放入您提供的完整烟花代码 -->
-</head>
-<body>
-  <!-- 烟花页面内容 -->
-</body>
-</html>`;
-
-      const output = document.getElementById('output');
-      output.innerHTML = '';
-      
-      for (let i = 1; i <= 25; i++) {
-        // 为每个用户创建独特的页面
-        const userSpecificCode = baseFireworksCode
-          .replace('2025新年快乐！万事如意！', `用户${i}的专属烟花 - 2025新年快乐！`)
-          .replace('Settings', `用户${i}的个性化设置`);
-        
-        const blob = new Blob([userSpecificCode], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `fireworks${i}.html`;
-        link.textContent = `下载 fireworks${i}.html`;
-        link.style.display = 'block';
-        link.style.margin = '10px';
-        
-        output.appendChild(link);
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>烟花登录系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      z-index: 10;
+    }
+    
+    .login-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      font-size: 28px;
+      background: linear-gradient(90deg, #ff8a00, #e52e71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    }
+    
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ff8a00, #e52e71);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .message {
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      display: none;
+    }
+    
+    .user-list {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    
+    .user-list h3 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .user-item {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .user-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .user-item:last-child {
+      border-bottom: none;
+    }
+    
+    .fireworks-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .firework {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+      animation: explode 1.5s forwards;
+    }
+    
+    @keyframes explode {
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(var(--y)) translateX(var(--x)) scale(1);
+        opacity: 0;
       }
     }
+    
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      animation: particle-fall 2s forwards;
+    }
+    
+    @keyframes particle-fall {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(30px) translateX(var(--tx));
+        opacity: 0;
+      }
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="fireworks-bg" id="fireworks-bg"></div>
+  
+  <div class="container">
+    <div class="login-card">
+      <h1>烟花登录系统</h1>
+      
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" placeholder="请输入用户名" autocomplete="off">
+      </div>
+      
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" placeholder="请输入密码">
+      </div>
+      
+      <button class="btn" id="login-btn">登录</button>
+      
+      <div class="message" id="message"></div>
+      
+      <div class="user-list">
+        <h3>可用账号 (共25个)</h3>
+        <div id="user-list-container"></div>
+      </div>
+      
+      <div class="footer">
+        <p>每个用户将跳转到独特的烟花页面</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 预定义25个用户账号
+    const users = [
+      { username: "user1", password: "pass1", file: "fireworks1.html" },
+      { username: "user2", password: "pass2", file: "fireworks2.html" },
+      { username: "user3", password: "pass3", file: "fireworks3.html" },
+      { username: "user4", password: "pass4", file: "fireworks4.html" },
+      { username: "user5", password: "pass5", file: "fireworks5.html" },
+      { username: "user6", password: "pass6", file: "fireworks6.html" },
+      { username: "user7", password: "pass7", file: "fireworks7.html" },
+      { username: "user8", password: "pass8", file: "fireworks8.html" },
+      { username: "user9", password: "pass9", file: "fireworks9.html" },
+      { username: "user10", password: "pass10", file: "fireworks10.html" },
+      { username: "user11", password: "pass11", file: "fireworks11.html" },
+      { username: "user12", password: "pass12", file: "fireworks12.html" },
+      { username: "user13", password: "pass13", file: "fireworks13.html" },
+      { username: "user14", password: "pass14", file: "fireworks14.html" },
+      { username: "user15", password: "pass15", file: "fireworks15.html" },
+      { username: "user16", password: "pass16", file: "fireworks16.html" },
+      { username: "user17", password: "pass17", file: "fireworks17.html" },
+      { username: "user18", password: "pass18", file: "fireworks18.html" },
+      { username: "user19", password: "pass19", file: "fireworks19.html" },
+      { username: "user20", password: "pass20", file: "fireworks20.html" },
+      { username: "user21", password: "pass21", file: "fireworks21.html" },
+      { username: "user22", password: "pass22", file: "fireworks22.html" },
+      { username: "user23", password: "pass23", file: "fireworks23.html" },
+      { username: "user24", password: "pass24", file: "fireworks24.html" },
+      { username: "user25", password: "pass25", file: "fireworks25.html" }
+    ];
+
+    // 初始化用户列表
+    function initUserList() {
+      const userListContainer = document.getElementById('user-list-container');
+      userListContainer.innerHTML = '';
+      
+      users.forEach(user => {
+        const userItem = document.createElement('div');
+        userItem.className = 'user-item';
+        userItem.textContent = `${user.username} - 点击自动填充`;
+        userItem.addEventListener('click', () => {
+          document.getElementById('username').value = user.username;
+          document.getElementById('password').value = user.password;
+        });
+        userListContainer.appendChild(userItem);
+      });
+    }
+
+    // 显示消息
+    function showMessage(text, isError = false) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.style.display = 'block';
+      messageEl.style.background = isError ? 
+        'rgba(231, 76, 60, 0.3)' : 'rgba(46, 204, 113, 0.3)';
+      
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 3000);
+    }
+
+    // 登录功能
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        showMessage('请输入用户名和密码', true);
+        return;
+      }
+      
+      const user = users.find(u => u.username === username && u.password === password);
+      
+      if (user) {
+        showMessage(`欢迎 ${username}！正在跳转...`);
+        
+        // 延迟跳转到对应的烟花页面
+        setTimeout(() => {
+          window.location.href = user.file;
+        }, 1500);
+      } else {
+        showMessage('用户名或密码错误', true);
+      }
+    }
+
+    // 创建背景烟花效果
+    function createFireworks() {
+      const fireworksBg = document.getElementById('fireworks-bg');
+      
+      setInterval(() => {
+        // 随机位置
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        
+        // 随机颜色
+        const colors = ['#ff0043', '#14fc56', '#1e7fff', '#e60aff', '#ffae00', '#ffffff'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        // 创建烟花
+        const firework = document.createElement('div');
+        firework.className = 'firework';
+        firework.style.left = `${x}%`;
+        firework.style.setProperty('--y', `${Math.random() * 70 + 10}%`);
+        firework.style.setProperty('--x', `${Math.random() * 40 - 20}px`);
+        firework.style.background = color;
+        firework.style.boxShadow = `0 0 10px 2px ${color}`;
+        
+        fireworksBg.appendChild(firework);
+        
+        // 创建粒子效果
+        setTimeout(() => {
+          for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = `${x}%`;
+            particle.style.top = `${y}%`;
+            particle.style.background = color;
+            particle.style.setProperty('--tx', `${Math.random() * 40 - 20}px`);
+            particle.style.animationDelay = `${Math.random() * 0.5}s`;
+            
+            fireworksBg.appendChild(particle);
+            
+            // 移除粒子
+            setTimeout(() => {
+              if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+              }
+            }, 2000);
+          }
+        }, 800);
+        
+        // 移除烟花
+        setTimeout(() => {
+          if (firework.parentNode) {
+            firework.parentNode.removeChild(firework);
+          }
+        }, 1500);
+      }, 1000);
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserList();
+      createFireworks();
+      
+      document.getElementById('login-btn').addEventListener('click', login);
+      
+      // 按Enter键登录
+      document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          login();
+        }
+      });
+    });
   </script>
 </body>
 </html>
